@@ -36,13 +36,33 @@ let circle3 = new Path2D();
   ctx.fillStyle = "#ff2c10";
   ctx.fill(circle3);
 
-//@TODO random coordinates
+/*@TODO random coordinates  Throw the monster somewhere on the screen randomly
+	monster.x = 32 + (Math.random() * (canvas.width - 64));
+	monster.y = 32 + (Math.random() * (canvas.height - 64)); */
 //@TODO random colors of circles
 
 let snakeHead = new Image();
 snakeHead.addEventListener('load', function() {
   console.log('Image was loaded');
-  ctx.drawImage(snakeHead, 300, 540);
+//  ctx.drawImage(snakeHead, 300, 540);
 })
 
 snakeHead.src = 'img/snake-head.png';
+
+//addEventListener("keydown", function (e) {
+//  console.warn('keydown');
+//});
+let start = {
+  x: 300,
+  y: 540
+}
+
+let int = setInterval(function() {
+  if (start.y < 0) {
+    clearInterval(int);
+  }
+  ctx.drawImage(snakeHead, start.x, start.y);
+  start.y -= 60;
+  ctx.clearRect( start.x, start.y + 120, step , step );
+  console.log("move");
+}, 1000)
