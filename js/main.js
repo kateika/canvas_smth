@@ -49,14 +49,6 @@ let circle3 = new Path2D();
 	monster.y = 32 + (Math.random() * (canvas.height - 64)); */
 //@TODO random colors of circles
 
-//draw snakeHead and set started point
-let snakeHead = new Image();
-snakeHead.addEventListener('load', function() {
-  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
-})
-
-snakeHead.src = 'img/snake-head.png';
-
 let snakeParams = {
   x: 300,
   y: 540,
@@ -65,6 +57,22 @@ let snakeParams = {
 }
 snakeParams.coordToMove = snakeParams.y - step;
 
+//draw snakeHead and set started point
+let snakeHead = new Image();
+let width = 54;
+let height = 54;
+
+snakeHead.addEventListener('load', function() {
+  ctx.save();
+  ctx.translate(size/2,size/2);
+  ctx.rotate(90*Math.PI/180); //actually it rotates image if set another x and y instead of snakeParams below. But it's at position (300,540) which I need
+  console.log(snakeParams.x);
+  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
+//  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
+  ctx.restore();
+})
+
+snakeHead.src = 'img/snake-head.png';
 
 //defining of variables
 let moveTimeout;
@@ -145,8 +153,8 @@ function moveForward(coordToMove, axis, direction) {
 }
 
 function moveTo(x, y, direction) {
-  clearTimeout(moveTimeout);
-  moveTimeout = setTimeout(function tick() {
+  clearInterval(moveTimeout);
+  moveTimeout = setInterval(function (){
     ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
     ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
     snakeParams.x = x;
