@@ -44,7 +44,7 @@ let circle3 = new Path2D();
 let snakeHead = new Image();
 snakeHead.addEventListener('load', function() {
   console.log('Image was loaded');
-  ctx.drawImage(snakeHead, start.x, start.y);
+  ctx.drawImage(snakeHead, start.x + 3, start.y + 3);
 })
 
 snakeHead.src = 'img/snake-head.png';
@@ -59,30 +59,25 @@ let snakeDir = {
   y: start.y,
 };
 
-//let int = setTimeout(function tick() {
-//  if (start.y < 0 || start.x < 0 || start.x > 600 || start.y > 600) {
-//    clearTimeout(int);
-//    return;
-//  }
-//  ctx.drawImage(snakeHead, start.x, start.y);
-//  start.y -= 60;
-//  ctx.clearRect( start.x + 1, start.y + 121, step - 2, step - 2); //1px and 2px is for not removing the border of cells
-//  snakeDir.x = start.x;
-//  snakeDir.y = start.y;
-////  console.log("snakeDirVar", snakeDir);
-//
-//  setTimeout(tick, 1000);
-//  console.log("move");
-//}, 1000);
+let int = setTimeout(function tick(changedCoord, direction) {
+console.log('inside move forward');
+  if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
+    clearTimeout(int);
+    return;
+  }
+  ctx.clearRect(snakeDir.x + 2, snakeDir.y + 2, step - 4, step - 4);
+  ctx.drawImage(snakeHead, changedCoord + 3, snakeDir.y + 3);
+  snakeDir.x = changedCoord;
+  changeDir(direction);
+}, 1000);
 
-
-  addEventListener("keydown", function (e) {
+addEventListener("keydown", function (e) {
   if(e.keyCode == '37' ) { //left
     console.log('left');
     changeDir('l');
-//    snakeHead.rotate(90);
-//    ctx.rotate(90);
-//    int = setTimeout(tick, 1000);
+  //    snakeHead.rotate(90);
+  //    ctx.rotate(90);
+  //    int = setTimeout(tick, 1000);
   }
   if(e.keyCode == '38' ) { //up
     console.log('up');
@@ -102,28 +97,24 @@ function changeDir(dir) {
   if(dir === 'l') {
     console.log('l');
     let snakeMove = snakeDir.x - 60;
-//    let shift = -60;
     let direction = "l";
     let axis = "x";
     moveForward(snakeMove, axis, direction);
   }
   if(dir === 'u') {
     let snakeMove = snakeDir.y - 60;
-//    let shift = -60;
     let direction = "u";
     let axis = "y";
     moveForward(snakeMove, axis, direction);
   }
   if(dir === 'r') {
     let snakeMove = snakeDir.x + 60;
-//    let shift = 60;
     let direction = "r";
     let axis = "x";
     moveForward(snakeMove, axis, direction);
   }
   if(dir === 'd') {
     let snakeMove = snakeDir.y + 60;
-//    let shift = 60;
     let direction = "d";
     let axis = "y";
     moveForward(snakeMove, axis, direction);
@@ -132,28 +123,31 @@ function changeDir(dir) {
 
 function moveForward(coord, axis, direction) {
   if (axis === "x") {
-    let int = setTimeout(function tick() {
-    console.log('inside move forward');
-      if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
-        clearTimeout(int);
-        return;
-      }
-      ctx.drawImage(snakeHead, coord, snakeDir.y);
-      ctx.clearRect(snakeDir.x, snakeDir.y, step, step); //Как вычислить snakeDir.y и погрешности в 1-2 пикселя в зависимости от направления?
-      ctx.drawImage(snakeHead, coord, snakeDir.y);
-      snakeDir.x = coord;
-      changeDir(direction);
-    }, 1000);
+    clearTimeout(int);
+    int(tick(coord, direction));
+//    let int = setTimeout(function tick() {
+//    console.log('inside move forward');
+//      if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
+//        clearTimeout(int);
+//        return;
+//      }
+//      ctx.drawImage(snakeHead, coord + 3, snakeDir.y + 3);
+//      ctx.clearRect(snakeDir.x + 2, snakeDir.y + 2, step - 4, step - 4);
+////      ctx.drawImage(snakeHead, coord, snakeDir.y + 2);
+//      snakeDir.x = coord;
+//      changeDir(direction);
+//    }, 1000);
   }
   if (axis === "y") {
+//    clearTimeout(int);
     let int = setTimeout(function tick() {
       if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
         clearTimeout(int);
         return;
       }
-      ctx.drawImage(snakeHead, snakeDir.x, coord);
-      ctx.clearRect( snakeDir.x, snakeDir.y, step, step );
-      ctx.drawImage(snakeHead, snakeDir.x, coord);
+      ctx.drawImage(snakeHead, snakeDir.x + 3, coord + 3);
+      ctx.clearRect( snakeDir.x + 2, snakeDir.y + 2, step - 4, step - 4 );
+//      ctx.drawImage(snakeHead, snakeDir.x, coord);
       snakeDir.y = coord;
       changeDir(direction);
     }, 1000);
