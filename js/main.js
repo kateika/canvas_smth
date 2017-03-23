@@ -128,7 +128,7 @@ function changeDir(dir) {
 function moveForward(coordToMove, axis, direction) {
   if (axis === "x") {
     if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
-      return;
+      loseGame()
     }
     clearTimeout(moveTimeout);
     moveTimeout = setTimeout(function tick() {
@@ -140,7 +140,7 @@ function moveForward(coordToMove, axis, direction) {
   }
   if (axis === "y") {
     if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
-      return;
+      loseGame();
     }
     clearTimeout(moveTimeout);
     moveTimeout = setTimeout(function tick() {
@@ -150,4 +150,11 @@ function moveForward(coordToMove, axis, direction) {
       changeDir(direction);
     }, 1000);
   }
+}
+
+function loseGame() {
+  ctx.clearRect(0, 0, size, size);
+  ctx.font = "30px Arial";
+  ctx.fillText("You lose", 250, 300);
+  return;
 }
