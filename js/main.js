@@ -5,12 +5,14 @@ if (canvas.getContext) {
  var ctx = canvas.getContext('2d');
 }
 
+//adjustments for drawing image in the center of cell and for avoiding clean the border of cells
 let adjustMove = 2;
 let adjustDraw = 3;
 let adjustCleanArea = 4;
 
 ctx.beginPath();
 
+//draw a field
 for ( var i = 0; i <= size; i+=60 ) {
   ctx.moveTo(i, 0);
   ctx.lineTo(i, size);
@@ -25,6 +27,8 @@ for ( var i = 0; i <= size; i+=60 ) {
   ctx.stroke();
 }
 
+
+//some hardcoded circles at the field
 let circle = new Path2D();
   circle.arc(330, 330, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
   ctx.fillStyle = "#8be400";
@@ -45,78 +49,76 @@ let circle3 = new Path2D();
 	monster.y = 32 + (Math.random() * (canvas.height - 64)); */
 //@TODO random colors of circles
 
+//draw snakeHead and set started point
 let snakeHead = new Image();
 snakeHead.addEventListener('load', function() {
-  ctx.drawImage(snakeHead, start.x + adjustDraw, start.y + adjustDraw);
+  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
 })
 
 snakeHead.src = 'img/snake-head.png';
 
-let start = {
+let snakeParams = {
   x: 300,
   y: 540,
   axis: "y",
   direction: "u"
 }
+snakeParams.coordToMove = snakeParams.y - step;
 
-start.coordToMove = start.y - step;
 
-let snakeDir = {
-  x: start.x,
-  y: start.y,
-};
-
+//defining of variables
 let moveTimeout;
+let currentDir = snakeParams.direction;
+let direction, snakeMove, axis;
 
-moveForward(start.coordToMove, start.axis, start.direction);
+//move snake forward by default
+moveForward(snakeParams.coordToMove, snakeParams.axis, snakeParams.direction);
 
 addEventListener("keydown", function (e) {
-  if(e.keyCode == '37' ) { //left
-//    console.log('left');
-    changeDir('l');
-  //    snakeHead.rotate(90);
-  }
-  if(e.keyCode == '38' ) { //up
-//    console.log('up');
-    changeDir('u');
-  }
-  if(e.keyCode == '39' ) { //right
-//    console.log('right');
-    changeDir('r');
-  }
-  if(e.keyCode == '40' ) { //down
-//    console.log('down');
-    changeDir('d');
+  switch(e.keyCode) {
+    case 37:
+      changeDir('l');
+      break;
+    case 38:
+      changeDir('u');
+      break;
+    case 39:
+      changeDir('r');
+      break;
+    case 40:
+      changeDir('d');
+      break;
+    default:
+      break;
   }
 });
 
-let currentDir = start.direction;
-let direction, snakeMove, axis;
+
 
 function changeDir(dir) {
   if(dir === 'l' && currentDir !== "r") {
-    snakeMove = snakeDir.x - step;
+    snakeMove = snakeParams.x - step;
     direction = "l";
     axis = "x";
     moveForward(snakeMove, axis, direction);
     currentDir = "l";
   }
   if(dir === 'u' && currentDir !== "d") {
-    snakeMove = snakeDir.y - step;
+    snakeMove = snakeParams.y - step;
     direction = "u";
     axis = "y";
     moveForward(snakeMove, axis, direction);
     currentDir = "u";
   }
   if(dir === 'r' && currentDir !== "l") {
-    snakeMove = snakeDir.x + step;
+    snakeMove = snakeParams.x + step;
     direction = "r";
     axis = "x";
     moveForward(snakeMove, axis, direction);
     currentDir = "r";
   }
   if(dir === 'd' && currentDir !== "u") {
-    snakeMove = snakeDir.y + step;
+    snakeMove = snakeParams.y + step;
     direction = "d";
     axis = "y";
     moveForward(snakeMove, axis, direction);
@@ -127,29 +129,30 @@ function changeDir(dir) {
 
 function moveForward(coordToMove, axis, direction) {
   if (axis === "x") {
-    if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
-      loseGame()
+    if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
+      loseGame();
+    } else {
+       moveTo(coordToMove, snakeParams.y, direction); 
     }
-    clearTimeout(moveTimeout);
-    moveTimeout = setTimeout(function tick() {
-      ctx.clearRect(snakeDir.x + adjustMove, snakeDir.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-      ctx.drawImage(snakeHead, coordToMove + adjustDraw, snakeDir.y + adjustDraw);
-      snakeDir.x = coordToMove;
-      changeDir(direction);
-    }, 1000);
   }
   if (axis === "y") {
-    if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
+    if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
       loseGame();
+    } else {
+       moveTo(snakeParams.x, coordToMove, direction); 
     }
-    clearTimeout(moveTimeout);
-    moveTimeout = setTimeout(function tick() {
-      ctx.clearRect(snakeDir.x + adjustMove, snakeDir.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea );
-      ctx.drawImage(snakeHead, snakeDir.x + adjustDraw, coordToMove + adjustDraw);
-      snakeDir.y = coordToMove;
-      changeDir(direction);
-    }, 1000);
   }
+}
+
+function moveTo(x, y, direction) {
+  clearTimeout(moveTimeout);
+  moveTimeout = setTimeout(function tick() {
+    ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+    ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
+    snakeParams.x = x;
+    snakeParams.y = y;
+    changeDir(direction);
+  }, 1000);
 }
 
 function loseGame() {
