@@ -5,6 +5,10 @@ if (canvas.getContext) {
  var ctx = canvas.getContext('2d');
 }
 
+let adjustMove = 2;
+let adjustDraw = 3;
+let adjustCleanArea = 4;
+
 ctx.beginPath();
 
 for ( var i = 0; i <= size; i+=60 ) {
@@ -43,15 +47,19 @@ let circle3 = new Path2D();
 
 let snakeHead = new Image();
 snakeHead.addEventListener('load', function() {
-  ctx.drawImage(snakeHead, start.x + 3, start.y + 3);
+  ctx.drawImage(snakeHead, start.x + adjustDraw, start.y + adjustDraw);
 })
 
 snakeHead.src = 'img/snake-head.png';
 
 let start = {
   x: 300,
-  y: 540
+  y: 540,
+  axis: "y",
+  direction: "u"
 }
+
+start.coordToMove = start.y - step;
 
 let snakeDir = {
   x: start.x,
@@ -60,81 +68,85 @@ let snakeDir = {
 
 let moveTimeout;
 
+moveForward(start.coordToMove, start.axis, start.direction);
+
 addEventListener("keydown", function (e) {
   if(e.keyCode == '37' ) { //left
-    console.log('left');
+//    console.log('left');
     changeDir('l');
   //    snakeHead.rotate(90);
-  //    ctx.rotate(90);
-  //    int = setTimeout(tick, 1000);
   }
   if(e.keyCode == '38' ) { //up
-    console.log('up');
+//    console.log('up');
     changeDir('u');
   }
   if(e.keyCode == '39' ) { //right
-    console.log('right');
+//    console.log('right');
     changeDir('r');
   }
   if(e.keyCode == '40' ) { //down
-    console.log('down');
+//    console.log('down');
     changeDir('d');
   }
 });
 
+let currentDir = start.direction;
+let direction, snakeMove, axis;
+
 function changeDir(dir) {
-  if(dir === 'l') {
-    console.log('l');
-    let snakeMove = snakeDir.x - 60;
-    let direction = "l";
-    let axis = "x";
+  if(dir === 'l' && currentDir !== "r") {
+    snakeMove = snakeDir.x - step;
+    direction = "l";
+    axis = "x";
     moveForward(snakeMove, axis, direction);
+    currentDir = "l";
   }
-  if(dir === 'u') {
-    let snakeMove = snakeDir.y - 60;
-    let direction = "u";
-    let axis = "y";
+  if(dir === 'u' && currentDir !== "d") {
+    snakeMove = snakeDir.y - step;
+    direction = "u";
+    axis = "y";
     moveForward(snakeMove, axis, direction);
+    currentDir = "u";
   }
-  if(dir === 'r') {
-    let snakeMove = snakeDir.x + 60;
-    let direction = "r";
-    let axis = "x";
+  if(dir === 'r' && currentDir !== "l") {
+    snakeMove = snakeDir.x + step;
+    direction = "r";
+    axis = "x";
     moveForward(snakeMove, axis, direction);
+    currentDir = "r";
   }
-  if(dir === 'd') {
-    let snakeMove = snakeDir.y + 60;
-    let direction = "d";
-    let axis = "y";
+  if(dir === 'd' && currentDir !== "u") {
+    snakeMove = snakeDir.y + step;
+    direction = "d";
+    axis = "y";
     moveForward(snakeMove, axis, direction);
+    currentDir = "d";
   }
 }
 
-function moveForward(coord, axis, direction) {
+
+function moveForward(coordToMove, axis, direction) {
   if (axis === "x") {
+    if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
+      return;
+    }
     clearTimeout(moveTimeout);
     moveTimeout = setTimeout(function tick() {
-    console.log('inside move forward');
-      if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
-        clearTimeout(moveTimeout);
-        return;
-      }
-      ctx.clearRect(snakeDir.x + 2, snakeDir.y + 2, step - 4, step - 4);
-      ctx.drawImage(snakeHead, coord + 3, snakeDir.y + 3);
-      snakeDir.x = coord;
+      ctx.clearRect(snakeDir.x + adjustMove, snakeDir.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+      ctx.drawImage(snakeHead, coordToMove + adjustDraw, snakeDir.y + adjustDraw);
+      snakeDir.x = coordToMove;
       changeDir(direction);
     }, 1000);
   }
   if (axis === "y") {
+    if (snakeDir.x < 0 || snakeDir.y < 0 || snakeDir.x > 540 || snakeDir.y > 540) {
+      return;
+    }
     clearTimeout(moveTimeout);
     moveTimeout = setTimeout(function tick() {
-      if (snakeDir.x < 1 || snakeDir.y < 1 || snakeDir.x > 599 || snakeDir.y > 599) {
-        clearTimeout(moveTimeout);
-        return;
-      }
-      ctx.clearRect(snakeDir.x + 2, snakeDir.y + 2, step - 4, step - 4 );
-      ctx.drawImage(snakeHead, snakeDir.x + 3, coord + 3);
-      snakeDir.y = coord;
+      ctx.clearRect(snakeDir.x + adjustMove, snakeDir.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea );
+      ctx.drawImage(snakeHead, snakeDir.x + adjustDraw, coordToMove + adjustDraw);
+      snakeDir.y = coordToMove;
       changeDir(direction);
     }, 1000);
   }
