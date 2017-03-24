@@ -1,11 +1,16 @@
 let canvas = document.getElementById('snake-game');
-let canvasU = document.getElementById('snake-u');
-let canvasD = document.getElementById('snake-d');
-let canvasL = document.getElementById('snake-l');
-let canvasR = document.getElementById('snake-r');
+let canvasU = document.createElement('canvas');
+canvasU.setAttribute("id", "snake-u");
+let canvasD = document.createElement('canvas');
+canvasD.setAttribute("id", "snake-d");
+let canvasL = document.createElement('canvas');
+canvasL.setAttribute("id", "snake-l");
+let canvasR = document.createElement('canvas');
+canvasR.setAttribute("id", "snake-r");
 
 let step = 60;
 let size = canvas.getAttribute("width");
+
 if (canvas.getContext && canvasU.getContext && canvasD.getContext && canvasL.getContext && canvasR.getContext) {
   var ctx = canvas.getContext('2d');
   var ctxU = canvasU.getContext('2d');
@@ -71,17 +76,16 @@ snakeParams.coordToMove = snakeParams.y - step;
 let snakeHead = new Image();
 
 snakeHead.addEventListener('load', function() {
-  ctxU.drawImage(snakeHead, 0, 0);
-  ctxD.drawImage(snakeHead, 0, 0);
-  ctxL.drawImage(snakeHead, 0, 0);
-  ctxR.drawImage(snakeHead, 0, 0);
-  ctx.drawImage(snakeHead, 303, 543);
+  ctxR.rotate(90*Math.PI/180);
+  ctxR.drawImage(snakeHead, 0, -54);
+//  ctxD.drawImage(snakeHead, 0, 0);
+//  ctxL.drawImage(snakeHead, 0, 0);
+//  ctxU.drawImage(snakeHead, 0, 0);
+  ctx.drawImage(canvasR, 303, 543);
+  
 })
 
 snakeHead.src = 'img/snake-head.png';
-
-//let snakeHeadD = ctx2.translate(0, 54);
-//    snakeHeadD = ctx.rotate(90*Math.PI/180);
 
       
 //defining of variables
