@@ -1,14 +1,24 @@
 let canvas = document.getElementById('snake-game');
+let canvasU = document.getElementById('snake-u');
+let canvasD = document.getElementById('snake-d');
+let canvasL = document.getElementById('snake-l');
+let canvasR = document.getElementById('snake-r');
+
 let step = 60;
 let size = canvas.getAttribute("width");
-if (canvas.getContext) {
- var ctx = canvas.getContext('2d');
+if (canvas.getContext && canvasU.getContext && canvasD.getContext && canvasL.getContext && canvasR.getContext) {
+  var ctx = canvas.getContext('2d');
+  var ctxU = canvasU.getContext('2d');
+  var ctxD = canvasD.getContext('2d');
+  var ctxL = canvasL.getContext('2d');
+  var ctxR = canvasR.getContext('2d');
 }
 
+
 //adjustments for drawing image in the center of cell and for avoiding clean the border of cells
-let adjustMove = 2;
-let adjustDraw = 3;
-let adjustCleanArea = 4;
+let adjustMove = 2,
+    adjustDraw = 3,
+    adjustCleanArea = 4;
 
 ctx.beginPath();
 
@@ -57,30 +67,30 @@ let snakeParams = {
 }
 snakeParams.coordToMove = snakeParams.y - step;
 
-//draw snakeHead and set started point
+//draw snakeHead on second canvas and set started point
 let snakeHead = new Image();
-let width = 54;
-let height = 54;
 
 snakeHead.addEventListener('load', function() {
-  ctx.save();
-  ctx.translate(size/2,size/2);
-  ctx.rotate(90*Math.PI/180); //actually it rotates image if set another x and y instead of snakeParams below. But it's at position (300,540) which I need
-  console.log(snakeParams.x);
-  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
-//  ctx.drawImage(snakeHead, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
-  ctx.restore();
+  ctxU.drawImage(snakeHead, 0, 0);
+  ctxD.drawImage(snakeHead, 0, 0);
+  ctxL.drawImage(snakeHead, 0, 0);
+  ctxR.drawImage(snakeHead, 0, 0);
+  ctx.drawImage(snakeHead, 303, 543);
 })
 
 snakeHead.src = 'img/snake-head.png';
 
+//let snakeHeadD = ctx2.translate(0, 54);
+//    snakeHeadD = ctx.rotate(90*Math.PI/180);
+
+      
 //defining of variables
 let moveTimeout;
 let currentDir = snakeParams.direction;
 let direction, snakeMove, axis;
 
 //move snake forward by default
-moveForward(snakeParams.coordToMove, snakeParams.axis, snakeParams.direction);
+//moveForward(snakeParams.coordToMove, snakeParams.axis, snakeParams.direction);
 
 addEventListener("keydown", function (e) {
   switch(e.keyCode) {
