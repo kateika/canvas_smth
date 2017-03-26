@@ -1,12 +1,8 @@
 let canvas = document.getElementById('snake-game');
 let canvasU = document.createElement('canvas');
-canvasU.setAttribute("id", "snake-u");
 let canvasD = document.createElement('canvas');
-canvasD.setAttribute("id", "snake-d");
 let canvasL = document.createElement('canvas');
-canvasL.setAttribute("id", "snake-l");
 let canvasR = document.createElement('canvas');
-canvasR.setAttribute("id", "snake-r");
 
 let step = 60;
 let size = canvas.getAttribute("width");
@@ -67,34 +63,60 @@ let circle3 = new Path2D();
 let snakeParams = {
   x: 300,
   y: 540,
-  axis: "y",
   direction: "u"
 }
 snakeParams.coordToMove = snakeParams.y - step;
 
-//draw snakeHead on second canvas and set started point
+//draw snakeHead on another canvas and set started point
 let snakeHead = new Image();
 
 snakeHead.addEventListener('load', function() {
-  ctxR.rotate(90*Math.PI/180);
-  ctxR.drawImage(snakeHead, 0, -54);
-//  ctxD.drawImage(snakeHead, 0, 0);
-//  ctxL.drawImage(snakeHead, 0, 0);
-//  ctxU.drawImage(snakeHead, 0, 0);
+//  ctxR.rotate(90*Math.PI/180);
+  ctxR.drawImage(snakeHead, 0, 0);
   ctx.drawImage(canvasR, 303, 543);
-  
 })
 
 snakeHead.src = 'img/snake-head.png';
 
-      
-//defining of variables
-let moveTimeout;
 let currentDir = snakeParams.direction;
-let direction, snakeMove, axis;
+let x = snakeParams.x;
+let y = snakeParams.y;
+let snakeMove, coefficient;
+
+
+
+function changeDir(direction) {
+//  console.log("change dir: ", dir);
+  if(direction === 'l' && currentDir !== "r") {
+    snakeMove = snakeParams.x - step;
+    currentDir = "l";
+  }
+  if(direction === 'u' && currentDir !== "d") {
+    snakeMove = snakeParams.y - step;
+    currentDir = "u";
+  }
+  if(direction === 'r' && currentDir !== "l") {
+    snakeMove = snakeParams.x + step;
+    currentDir = "r";
+  }
+  if(direction === 'd' && currentDir !== "u") {
+    snakeMove = snakeParams.y + step;
+    currentDir = "d";
+  }
+}
 
 //move snake forward by default
-//moveForward(snakeParams.coordToMove, snakeParams.axis, snakeParams.direction);
+let moveInterval = setInterval(function() {
+  if (currentDir === "d" || currentDir === "r") {
+    coefficient = 1;
+    move(coefficient);
+  };
+  if (currentDir === "u" || currentDir === "l") {
+    coefficient = -1;
+    move(coefficient);
+  } 
+}, 1000);
+
 
 addEventListener("keydown", function (e) {
   switch(e.keyCode) {
@@ -116,68 +138,29 @@ addEventListener("keydown", function (e) {
 });
 
 
-
-function changeDir(dir) {
-  if(dir === 'l' && currentDir !== "r") {
-    snakeMove = snakeParams.x - step;
-    direction = "l";
-    axis = "x";
-    moveForward(snakeMove, axis, direction);
-    currentDir = "l";
-  }
-  if(dir === 'u' && currentDir !== "d") {
-    snakeMove = snakeParams.y - step;
-    direction = "u";
-    axis = "y";
-    moveForward(snakeMove, axis, direction);
-    currentDir = "u";
-  }
-  if(dir === 'r' && currentDir !== "l") {
-    snakeMove = snakeParams.x + step;
-    direction = "r";
-    axis = "x";
-    moveForward(snakeMove, axis, direction);
-    currentDir = "r";
-  }
-  if(dir === 'd' && currentDir !== "u") {
-    snakeMove = snakeParams.y + step;
-    direction = "d";
-    axis = "y";
-    moveForward(snakeMove, axis, direction);
-    currentDir = "d";
-  }
-}
-
-
-function moveForward(coordToMove, axis, direction) {
-  if (axis === "x") {
-    if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
+function move(coefficient) {
+//  console.log("moveTo", dir);
+  
+  if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
       loseGame();
+  } else {
+    if (currentDir === "l" || currentDir === "r") {
+//      console.log(snakeParams.x, snakeParams.y);
+      ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+      x += step * coefficient;      
+      ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
+      snakeParams.x = x;
     } else {
-       moveTo(coordToMove, snakeParams.y, direction); 
+      ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+      y += step * coefficient;
+      ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
+      snakeParams.y = y;
     }
   }
-  if (axis === "y") {
-    if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
-      loseGame();
-    } else {
-       moveTo(snakeParams.x, coordToMove, direction); 
-    }
-  }
-}
-
-function moveTo(x, y, direction) {
-  clearInterval(moveTimeout);
-  moveTimeout = setInterval(function (){
-    ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-    ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
-    snakeParams.x = x;
-    snakeParams.y = y;
-    changeDir(direction);
-  }, 1000);
 }
 
 function loseGame() {
+  clearInterval(moveInterval);
   ctx.clearRect(0, 0, size, size);
   ctx.font = "30px Arial";
   ctx.fillText("You lose", 250, 300);
