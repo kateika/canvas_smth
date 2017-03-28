@@ -79,8 +79,8 @@ snakeHead.addEventListener('load', function() {
   ctxR.translate(0, -54);
   ctxR.drawImage(snakeHead, 0, 0);
   
-  ctxL.rotate(270*Math.PI/180);
-  ctxL.translate(-54, 60);
+  ctxL.rotate(90*Math.PI*(-1)/180);
+  ctxL.translate(-54, 0);
   ctxL.drawImage(snakeHead, 0, 0);
   
   ctxD.rotate(180*Math.PI/180);
