@@ -71,9 +71,21 @@ snakeParams.coordToMove = snakeParams.y - step;
 let snakeHead = new Image();
 
 snakeHead.addEventListener('load', function() {
-//  ctxR.rotate(90*Math.PI/180);
+  ctxU.drawImage(snakeHead, 0, 0);
+  ctx.drawImage(canvasU, 303, 543);
+  
+  //other heads
+  ctxR.rotate(90*Math.PI/180);
+  ctxR.translate(0, -54);
   ctxR.drawImage(snakeHead, 0, 0);
-  ctx.drawImage(canvasR, 303, 543);
+  
+  ctxL.rotate(270*Math.PI/180);
+  ctxL.translate(-54, 60);
+  ctxL.drawImage(snakeHead, 0, 0);
+  
+  ctxD.rotate(180*Math.PI/180);
+  ctxD.translate(-54, -54);
+  ctxD.drawImage(snakeHead, 0, 0);
 })
 
 snakeHead.src = 'img/snake-head.png';
@@ -145,15 +157,25 @@ function move(coefficient) {
       loseGame();
   } else {
     if (currentDir === "l" || currentDir === "r") {
-//      console.log(snakeParams.x, snakeParams.y);
       ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-      x += step * coefficient;      
-      ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
+      x += step * coefficient;
+      console.log(coefficient);
+      if(coefficient < 0) {
+        ctx.drawImage(canvasL, x + adjustDraw, y + adjustDraw);
+      } else {
+        ctx.drawImage(canvasR, x + adjustDraw, y + adjustDraw);
+      }     
       snakeParams.x = x;
+      snakeParams.y = y;
     } else {
       ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
       y += step * coefficient;
-      ctx.drawImage(snakeHead, x + adjustDraw, y + adjustDraw);
+      if(coefficient < 0) {
+        ctx.drawImage(canvasU, x + adjustDraw, y + adjustDraw);
+      } else {
+        ctx.drawImage(canvasD, x + adjustDraw, y + adjustDraw);
+      }   
+      snakeParams.x = x;
       snakeParams.y = y;
     }
   }
