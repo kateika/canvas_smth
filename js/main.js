@@ -181,10 +181,48 @@ function move(coefficient) {
   }
 }
 
+function countCell(cell) {
+  let row, column;
+  if (cell < 10) {
+    cell = "0" + cell;
+  }
+  if (cell === 100) {
+    row = 10;
+    column = 10;
+    return [ row, column ];
+  }
+  
+  let firstDigit = String(cell).charAt(0);
+  let secondDigit = String(cell).charAt(1);
+  
+  if (secondDigit === "0") {
+    row = Number(firstDigit);
+    column = 10;
+    return [ row, column ];
+  } else {
+    row = Number(firstDigit) + 1;
+    column = Number(secondDigit);
+    return [ row, column ];
+  }
+}
+
+console.log("9", countCell(9));
+console.log("10", countCell(10));
+console.log("15", countCell(15));
+console.log("29", countCell(29));
+console.log("31", countCell(31));
+console.log("42", countCell(42));
+console.log("59", countCell(59));
+console.log("60", countCell(60));
+console.log("75", countCell(75));
+console.log("86", countCell(86));
+console.log("97", countCell(97));
+console.log("100", countCell(100));
+
 function loseGame() {
-  clearInterval(moveInterval);
+/*  clearInterval(moveInterval);
   ctx.clearRect(0, 0, size, size);
   ctx.font = "30px Arial";
-  ctx.fillText("You lose", 250, 300);
+  ctx.fillText("You lose", 250, 300);*/
   return;
 }
