@@ -62,17 +62,43 @@ let circle3 = new Path2D();
 
 let snakeParams = {
   x: 300,
-  y: 540,
-  direction: "u"
+  y: 420,
+  direction: "u",
+  cellx: 300/step,
+  celly: 540/step
 }
+
+let snakebody = [ 
+  {x: snakeParams.cellx, y: snakeParams.celly}, 
+  {x: snakeParams.cellx, y: snakeParams.celly + 1}, 
+  {x: snakeParams.cellx, y: snakeParams.celly + 2} 
+]
+
+function fromCellsToPx(body) {
+  let snakebodyPixels = [];
+  for (var i = 0; i < body.length; i++) {
+    snakebodyPixels[i] = {
+      x: body[i].x * step,
+      y: body[i].y * step
+    }
+  }
+  return snakebodyPixels;
+}
+
+
+//snakeParams.coordToMove = fromCellsToPx(snakeParams.cellx, snakeParams.celly);
+
 snakeParams.coordToMove = snakeParams.y - step;
+/*Coord to move snakeParams.y - step;*/
+
+
 
 //draw snakeHead on another canvas and set started point
 let snakeHead = new Image();
 
 snakeHead.addEventListener('load', function() {
   ctxU.drawImage(snakeHead, 0, 0);
-  ctx.drawImage(canvasU, 303, 543);
+  ctx.drawImage(canvasU, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
   
   //other heads
   ctxR.rotate(90*Math.PI/180);
@@ -121,11 +147,11 @@ function changeDir(direction) {
 let moveInterval = setInterval(function() {
   if (currentDir === "d" || currentDir === "r") {
     coefficient = 1;
-    move(coefficient);
+    move(snakebody,coefficient);
   };
   if (currentDir === "u" || currentDir === "l") {
     coefficient = -1;
-    move(coefficient);
+    move(snakebody,coefficient);
   } 
 }, 1000);
 
@@ -149,75 +175,59 @@ addEventListener("keydown", function (e) {
   }
 });
 
+let snakebodyPx;
 
-function move(coefficient) {
-//  console.log("moveTo", dir);
-  
-  if (snakeParams.x < 0 || snakeParams.y < 0 || snakeParams.x > (size - step) || snakeParams.y > (size - step)) {
-      loseGame();
+function move(snakebody, coefficient) {
+  debugger
+  if (snakebody[0].x < 1 || snakebody[0].y < 0 || snakebody[0].x > 11 || snakebody[0].x > 11) {
+//    console.log(snakebody[0].x,snakebody[0].y, snakebody);
+    loseGame();
   } else {
+//    console.log('else');
     if (currentDir === "l" || currentDir === "r") {
-      ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-      x += step * coefficient;
-      console.log(coefficient);
+      snakebodyPx = fromCellsToPx(snakebody);
+//        console.log("snakebodyPx LEFT\RIGHT", snakebodyPx);
+
+      for (var coordinates of snakebody) {
+        ctx.clearRect(coordinates.x + adjustMove, coordinates.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+      }
+
       if(coefficient < 0) {
-        ctx.drawImage(canvasL, x + adjustDraw, y + adjustDraw);
+        for (var coordinates of snakebodyPx) {
+          ctx.drawImage(canvasL, (coordinates.x + coefficient* step) + adjustDraw, coordinates.y + adjustDraw);
+        }
       } else {
-        ctx.drawImage(canvasR, x + adjustDraw, y + adjustDraw);
+        for (var coordinates of snakebodyPx) {
+          ctx.drawImage(canvasL, (coordinates.x + coefficient* step) + adjustDraw, coordinates.y + adjustDraw);
+        }
       }     
-      snakeParams.x = x;
-      snakeParams.y = y;
+      
+      snakebody.unshift({x: snakebody[0].x + coefficient, y: snakebody[0].y})
+      
     } else {
-      ctx.clearRect(snakeParams.x + adjustMove, snakeParams.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-      y += step * coefficient;
+      snakebodyPx = fromCellsToPx(snakebody);
+//      console.log("snakebodyPx UP/DOWN", snakebodyPx);
+
+      for (var coordinates of snakebody) {
+        ctx.clearRect(coordinates.x + adjustMove, coordinates.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+      }
+
       if(coefficient < 0) {
-        ctx.drawImage(canvasU, x + adjustDraw, y + adjustDraw);
+        for (var coordinates of snakebodyPx) {
+          ctx.drawImage(canvasL, coordinates.x + adjustDraw, (coordinates.y + coefficient* step) + adjustDraw);
+        }
       } else {
-        ctx.drawImage(canvasD, x + adjustDraw, y + adjustDraw);
-      }   
-      snakeParams.x = x;
-      snakeParams.y = y;
+        for (var coordinates of snakebodyPx) {
+          ctx.drawImage(canvasL, coordinates.x + adjustDraw, (coordinates.y + coefficient* step) + adjustDraw);
+        }
+      }     
+      
+      snakebody.unshift({x: snakebody[0].x, y: snakebody[0].y + coefficient })
+      
     }
   }
 }
 
-function countCell(cell) {
-  let row, column;
-  if (cell < 10) {
-    cell = "0" + cell;
-  }
-  if (cell === 100) {
-    row = 10;
-    column = 10;
-    return [ row, column ];
-  }
-  
-  let firstDigit = String(cell).charAt(0);
-  let secondDigit = String(cell).charAt(1);
-  
-  if (secondDigit === "0") {
-    row = Number(firstDigit);
-    column = 10;
-    return [ row, column ];
-  } else {
-    row = Number(firstDigit) + 1;
-    column = Number(secondDigit);
-    return [ row, column ];
-  }
-}
-
-console.log("9", countCell(9));
-console.log("10", countCell(10));
-console.log("15", countCell(15));
-console.log("29", countCell(29));
-console.log("31", countCell(31));
-console.log("42", countCell(42));
-console.log("59", countCell(59));
-console.log("60", countCell(60));
-console.log("75", countCell(75));
-console.log("86", countCell(86));
-console.log("97", countCell(97));
-console.log("100", countCell(100));
 
 function loseGame() {
 /*  clearInterval(moveInterval);
