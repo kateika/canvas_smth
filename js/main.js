@@ -180,7 +180,11 @@ function move(snakebody, coefficient) {
       snakebodyPx = fromCellsToPx(snakebody);
 
       for (var coordinates of snakebodyPx) {
-        ctx.drawImage(canvasU, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+        if(coefficient < 0) {
+          ctx.drawImage(canvasU, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+        } else {
+          ctx.drawImage(canvasD, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+        }
       }      
     } else {
       snakebodyPx = fromCellsToPx(snakebody);
@@ -195,8 +199,12 @@ function move(snakebody, coefficient) {
       snakebodyPx = fromCellsToPx(snakebody);
 
       for (var coordinates of snakebodyPx) {
-        ctx.drawImage(canvasU, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
-      }  
+        if(coefficient < 0) {
+          ctx.drawImage(canvasL, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+        } else {
+          ctx.drawImage(canvasR, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+        }
+      }
     }
   }
 }
