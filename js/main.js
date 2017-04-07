@@ -65,13 +65,13 @@ let snakeParams = {
   y: 420,
   direction: "u",
   cellx: 300/step,
-  celly: 540/step
+  celly: 420/step
 }
 
 let snakebody = [ 
   {x: snakeParams.cellx, y: snakeParams.celly}, 
   {x: snakeParams.cellx, y: snakeParams.celly + 1}, 
-  {x: snakeParams.cellx, y: snakeParams.celly + 2} 
+  {x: snakeParams.cellx, y: snakeParams.celly + 2}
 ]
 
 function fromCellsToPx(body) {
@@ -86,19 +86,12 @@ function fromCellsToPx(body) {
 }
 
 
-//snakeParams.coordToMove = fromCellsToPx(snakeParams.cellx, snakeParams.celly);
-
-snakeParams.coordToMove = snakeParams.y - step;
-/*Coord to move snakeParams.y - step;*/
-
-
-
 //draw snakeHead on another canvas and set started point
 let snakeHead = new Image();
 
 snakeHead.addEventListener('load', function() {
   ctxU.drawImage(snakeHead, 0, 0);
-  ctx.drawImage(canvasU, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
+  //ctx.drawImage(canvasU, snakeParams.x + adjustDraw, snakeParams.y + adjustDraw);
   
   //other heads
   ctxR.rotate(90*Math.PI/180);
@@ -117,42 +110,35 @@ snakeHead.addEventListener('load', function() {
 snakeHead.src = 'img/snake-head.png';
 
 let currentDir = snakeParams.direction;
-let x = snakeParams.x;
-let y = snakeParams.y;
-let snakeMove, coefficient;
+let coefficient;
 
 
 
 function changeDir(direction) {
-//  console.log("change dir: ", dir);
   if(direction === 'l' && currentDir !== "r") {
-    snakeMove = snakeParams.x - step;
     currentDir = "l";
   }
   if(direction === 'u' && currentDir !== "d") {
-    snakeMove = snakeParams.y - step;
     currentDir = "u";
   }
   if(direction === 'r' && currentDir !== "l") {
-    snakeMove = snakeParams.x + step;
     currentDir = "r";
   }
   if(direction === 'd' && currentDir !== "u") {
-    snakeMove = snakeParams.y + step;
     currentDir = "d";
   }
 }
 
 //move snake forward by default
 let moveInterval = setInterval(function() {
-  if (currentDir === "d" || currentDir === "r") {
-    coefficient = 1;
-    move(snakebody,coefficient);
-  };
   if (currentDir === "u" || currentDir === "l") {
     coefficient = -1;
     move(snakebody,coefficient);
   } 
+  if (currentDir === "d" || currentDir === "r") {
+    coefficient = 1;
+    move(snakebody,coefficient);
+  };
 }, 1000);
 
 
@@ -178,61 +164,49 @@ addEventListener("keydown", function (e) {
 let snakebodyPx;
 
 function move(snakebody, coefficient) {
-  debugger
-  if (snakebody[0].x < 1 || snakebody[0].y < 0 || snakebody[0].x > 11 || snakebody[0].x > 11) {
-//    console.log(snakebody[0].x,snakebody[0].y, snakebody);
+  if (snakebody[0].x < 1 || snakebody[0].y < 1 || snakebody[0].x > 8 || snakebody[0].y > 8) { //8 because we need to hold at least 3 elements of body on field
     loseGame();
   } else {
-//    console.log('else');
-    if (currentDir === "l" || currentDir === "r") {
+    if (currentDir === "u" || currentDir === "d") {
       snakebodyPx = fromCellsToPx(snakebody);
-//        console.log("snakebodyPx LEFT\RIGHT", snakebodyPx);
-
-      for (var coordinates of snakebody) {
+      
+      for (var coordinates of snakebodyPx) {
         ctx.clearRect(coordinates.x + adjustMove, coordinates.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
       }
+      
+      snakebody.unshift({x: snakebody[0].x, y: snakebody[0].y + coefficient});
+      snakebody.pop();
+      
+      snakebodyPx = fromCellsToPx(snakebody);
 
-      if(coefficient < 0) {
-        for (var coordinates of snakebodyPx) {
-          ctx.drawImage(canvasL, (coordinates.x + coefficient* step) + adjustDraw, coordinates.y + adjustDraw);
-        }
-      } else {
-        for (var coordinates of snakebodyPx) {
-          ctx.drawImage(canvasL, (coordinates.x + coefficient* step) + adjustDraw, coordinates.y + adjustDraw);
-        }
-      }     
-      
-      snakebody.unshift({x: snakebody[0].x + coefficient, y: snakebody[0].y})
-      
+      for (var coordinates of snakebodyPx) {
+        ctx.drawImage(canvasU, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+      }      
     } else {
       snakebodyPx = fromCellsToPx(snakebody);
-//      console.log("snakebodyPx UP/DOWN", snakebodyPx);
-
-      for (var coordinates of snakebody) {
+      
+      for (var coordinates of snakebodyPx) {
         ctx.clearRect(coordinates.x + adjustMove, coordinates.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
       }
+      
+      snakebody.unshift({x: snakebody[0].x  + coefficient, y: snakebody[0].y});
+      snakebody.pop();
+      
+      snakebodyPx = fromCellsToPx(snakebody);
 
-      if(coefficient < 0) {
-        for (var coordinates of snakebodyPx) {
-          ctx.drawImage(canvasL, coordinates.x + adjustDraw, (coordinates.y + coefficient* step) + adjustDraw);
-        }
-      } else {
-        for (var coordinates of snakebodyPx) {
-          ctx.drawImage(canvasL, coordinates.x + adjustDraw, (coordinates.y + coefficient* step) + adjustDraw);
-        }
-      }     
-      
-      snakebody.unshift({x: snakebody[0].x, y: snakebody[0].y + coefficient })
-      
+      for (var coordinates of snakebodyPx) {
+        ctx.drawImage(canvasU, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+      }  
     }
   }
 }
 
+//@TODO 1) Кажется, что хвост переставляется вперед, когда поворачиваешь змейку. Как это проверить без разноцветного тела? 2) Ветки if и else отлчиаются только переназначение x и y координат
 
 function loseGame() {
-/*  clearInterval(moveInterval);
+  clearInterval(moveInterval);
   ctx.clearRect(0, 0, size, size);
   ctx.font = "30px Arial";
-  ctx.fillText("You lose", 250, 300);*/
+  ctx.fillText("You lose", 250, 300);
   return;
 }
