@@ -27,23 +27,22 @@ ctx.beginPath();
 for ( var i = 0; i <= size; i+=60 ) {
   ctx.moveTo(i, 0);
   ctx.lineTo(i, size);
-  ctx.closePath();
   ctx.stroke();
 }
 
 for ( var i = 0; i <= size; i+=60 ) {
   ctx.moveTo(0, i);
   ctx.lineTo(size, i);
-  ctx.closePath();
   ctx.stroke();
 }
 
+ctx.closePath();
 
 //some hardcoded circles at the field
-let circle = new Path2D();
-  circle.arc(330, 330, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
+let circle1 = new Path2D();
+  circle1.arc(330, 330, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
   ctx.fillStyle = "#8be400";
-  ctx.fill(circle);
+  ctx.fill(circle1);
 
 let circle2 = new Path2D();
   circle2.arc(30, 30, 20, 0, 2 * Math.PI);
@@ -108,7 +107,7 @@ snakeHead.src = 'img/snake-head.png';
 
 let currentDir = snakeParams.direction;
 let currentCanvas = canvasU;
-let coefficient;
+let snakebodyPx, coefficient, coefficientY, coefficientX, circle, dotsBody;
 
 
 function changeDir(direction) {
@@ -162,8 +161,6 @@ addEventListener("keydown", function (e) {
   }
 });
 
-let snakebodyPx, coefficientY, coefficientX;
-
 function move(snakebody, coefficient) {
   if (currentDir === "u" || currentDir === "d") {
     coefficientY = coefficient;
@@ -189,8 +186,15 @@ function move(snakebody, coefficient) {
     return;
   } 
   
-  for (var coordinates of snakebodyPx) {
-    ctx.drawImage(currentCanvas, coordinates.x + adjustDraw, coordinates.y + adjustDraw);
+  ctx.drawImage(currentCanvas, snakebodyPx[0].x + adjustDraw, snakebodyPx[0].y + adjustDraw);
+  
+  dotsBody = snakebodyPx.slice(1);
+  
+  for (var coordinates of dotsBody) {
+    circle = new Path2D();
+    circle.arc(coordinates.x + 30, coordinates.y + 30, 20, 0, 2 * Math.PI);
+    ctx.fillStyle = "#8be400";
+    ctx.fill(circle);  
   }      
 }
 
