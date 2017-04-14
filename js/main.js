@@ -39,20 +39,21 @@ for ( var i = 0; i <= size; i+=60 ) {
 ctx.closePath();
 
 //some hardcoded circles at the field
-let circle1 = new Path2D();
-  circle1.arc(330, 330, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
-  ctx.fillStyle = "#8be400";
-  ctx.fill(circle1);
+//let circle1 = new Path2D();
+//  circle1.arc(330, 330, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
+//  ctx.fillStyle = "#8be400";
+//  ctx.fill(circle1);
+//
+//let circle2 = new Path2D();
+//  circle2.arc(30, 30, 20, 0, 2 * Math.PI);
+//  ctx.fillStyle = "#fff404";
+//  ctx.fill(circle2);
+//
+//let circle3 = new Path2D();
+//  circle3.arc(270, 150, 20, 0, 2 * Math.PI);
+//  ctx.fillStyle = "#ff2c10";
+//  ctx.fill(circle3);
 
-let circle2 = new Path2D();
-  circle2.arc(30, 30, 20, 0, 2 * Math.PI);
-  ctx.fillStyle = "#fff404";
-  ctx.fill(circle2);
-
-let circle3 = new Path2D();
-  circle3.arc(270, 150, 20, 0, 2 * Math.PI);
-  ctx.fillStyle = "#ff2c10";
-  ctx.fill(circle3);
 
 /*@TODO random coordinates  Throw the monster somewhere on the screen randomly
 	monster.x = 32 + (Math.random() * (canvas.width - 64));
@@ -62,24 +63,33 @@ let circle3 = new Path2D();
 let snake = {
   currHead: canvasU,
   direction: "u",
-  cellx: 5,
-  celly: 8,
   body: [ 
     {x: 5, y: 8}, 
     {x: 5, y: 9}, 
     {x: 5, y: 10}
-  ]
+  ],
 }
 
+let el = {
+  body: [
+    {x: 5, y: 6}
+  ],
+  color: "#8be400"
+}
+
+ctx.fillStyle = el.color;
+ctx.fillRect( 300 + adjustDraw, 300 + adjustDraw, 54, 54 );
+
+
 function fromCellsToPx(body) {
-  let snakebodyPixels = [];
+  let bodyPixels = [];
   for (var i = 0; i < body.length; i++) {
-    snakebodyPixels[i] = {
+    bodyPixels[i] = {
       x: body[i].x * step,
       y: body[i].y * step
     }
   }
-  return snakebodyPixels;
+  return bodyPixels;
 }
 
 
@@ -103,7 +113,7 @@ snakeHead.addEventListener('load', function() {
   ctxD.drawImage(snakeHead, 0, 0);
 })
 
-snakeHead.src = 'img/snake-head.png';
+snakeHead.src = 'img/snake-head.jpg';
 
 let snakebodyPx, coefficient, circle, dotsBody;
 
@@ -168,6 +178,12 @@ function move(snakebody, coefficient) {
     var coefficientX = coefficient;
   }
   
+  if (el.body[0].y === snakebody[0].y && el.body[0].x === snakebody[0].x) {   
+    snakebody.push( { x: el.body[0].x, y: el.body[0].y } );
+    drawFood();// add checking for not drawing food at places of snake body
+  }
+  
+  elPx = fromCellsToPx(el);
   snakebodyPx = fromCellsToPx(snakebody);
 
   for (var coordinates of snakebodyPx) {
@@ -189,13 +205,23 @@ function move(snakebody, coefficient) {
   dotsBody = snakebodyPx.slice(1);
   
   for (var coordinates of dotsBody) {
-    circle = new Path2D();
-    circle.arc(coordinates.x + 30, coordinates.y + 30, 20, 0, 2 * Math.PI); //сдвиг круга относительно координат = 30px
-    ctx.fillStyle = "#8be400";
-    ctx.fill(circle);  
+    ctx.fillStyle = el.color; //works only for one color for now
+    ctx.fillRect( coordinates.x + adjustDraw, coordinates.y + adjustDraw, 54, 54 );
   }      
 }
 
+
+function drawFood() {
+  el.body[0].x = getRandom();
+  el.body[0].y = getRandom(); 
+  let elPx = fromCellsToPx(el.body);
+  ctx.fillStyle = el.color;
+  ctx.fillRect( elPx[0].x + adjustDraw, elPx[0].y + adjustDraw, 54, 54 );
+}
+
+function getRandom() {
+  return Math.floor(Math.random() * (10-1)) + 1;
+}
 
 function loseGame() {
   clearInterval(moveInterval);
