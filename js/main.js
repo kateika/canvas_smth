@@ -95,6 +95,7 @@ function fromCellsToPx(body) {
 
 //draw snakeHead on another canvas and set started point
 let snakeHead = new Image();
+let moveInterval;
 
 snakeHead.addEventListener('load', function() {
   ctxU.drawImage(snakeHead, 0, 0);
@@ -111,6 +112,18 @@ snakeHead.addEventListener('load', function() {
   ctxD.rotate(180*Math.PI/180);
   ctxD.translate(-54, -54);
   ctxD.drawImage(snakeHead, 0, 0);
+  
+  //move snake forward by default
+  moveInterval = setInterval(function() {
+    if (snake.direction === "u" || snake.direction === "l") {
+      coefficient = -1;
+      move(snake.body, coefficient);
+    } 
+    if (snake.direction === "d" || snake.direction === "r") {
+      coefficient = 1;
+      move(snake.body, coefficient);
+    };
+  }, 1000);
 })
 
 snakeHead.src = 'img/snake-head.jpg';
@@ -136,19 +149,6 @@ function changeDir(direction) {
     snake.currHead = canvasD;
   }
 }
-
-//move snake forward by default
-let moveInterval = setInterval(function() {
-  if (snake.direction === "u" || snake.direction === "l") {
-    coefficient = -1;
-    move(snake.body, coefficient);
-  } 
-  if (snake.direction === "d" || snake.direction === "r") {
-    coefficient = 1;
-    move(snake.body, coefficient);
-  };
-}, 1000);
-
 
 addEventListener("keydown", function (e) {
   switch(e.keyCode) {
