@@ -70,9 +70,10 @@ let snake = {
   ],
 }
 
+//console.log(snake.body);
 let el = {
-  body: [
-    {x: 5, y: 6}
+  body: [ 
+    {x: 5, y: 5} 
   ],
   color: "#8be400"
 }
@@ -80,9 +81,8 @@ let el = {
 ctx.fillStyle = el.color;
 ctx.fillRect( 300 + adjustDraw, 300 + adjustDraw, 54, 54 );
 
-
 function fromCellsToPx(body) {
-  let bodyPixels = [];
+  var bodyPixels = [];
   for (var i = 0; i < body.length; i++) {
     bodyPixels[i] = {
       x: body[i].x * step,
@@ -115,8 +115,8 @@ snakeHead.addEventListener('load', function() {
 
 snakeHead.src = 'img/snake-head.jpg';
 
-let snakebodyPx, coefficient, circle, dotsBody;
 
+let snakebodyPx, coefficient, circle, dotsBody;
 
 function changeDir(direction) {
   if(direction === 'l' && snake.direction !== "r") {
@@ -169,6 +169,7 @@ addEventListener("keydown", function (e) {
   }
 });
 
+
 function move(snakebody, coefficient) {
   if (snake.direction === "u" || snake.direction === "d") {
     var coefficientY = coefficient;
@@ -178,21 +179,23 @@ function move(snakebody, coefficient) {
     var coefficientX = coefficient;
   }
   
+  //@TODO snakebody.x(y) is always the same as snake.body.x(y)
+
+  snakebodyPx = fromCellsToPx(snakebody);
+  
+    
+  var lastElToPx = fromCellsToPx(snakebody)[snakebody.length-1];
+  
+  ctx.clearRect(lastElToPx.x + adjustMove, lastElToPx.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
+  
+  snakebody.unshift({x: snakebody[0].x + coefficientX, y: snakebody[0].y + coefficientY});
+  
   if (el.body[0].y === snakebody[0].y && el.body[0].x === snakebody[0].x) {   
-    snakebody.push( { x: el.body[0].x, y: el.body[0].y } );
     drawFood();// add checking for not drawing food at places of snake body
+  } else {
+    snakebody.pop();
   }
   
-  elPx = fromCellsToPx(el);
-  snakebodyPx = fromCellsToPx(snakebody);
-
-  for (var coordinates of snakebodyPx) {
-    ctx.clearRect(coordinates.x + adjustMove, coordinates.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-  }
-
-  snakebody.unshift({x: snakebody[0].x + coefficientX, y: snakebody[0].y + coefficientY});
-  snakebody.pop();
-
   snakebodyPx = fromCellsToPx(snakebody);
 
   if (snakebody[0].x < 0 || snakebody[0].y < 0 || snakebody[0].x > 9 || snakebody[0].y > 9) {
@@ -207,7 +210,7 @@ function move(snakebody, coefficient) {
   for (var coordinates of dotsBody) {
     ctx.fillStyle = el.color; //works only for one color for now
     ctx.fillRect( coordinates.x + adjustDraw, coordinates.y + adjustDraw, 54, 54 );
-  }      
+  }
 }
 
 
@@ -225,8 +228,8 @@ function getRandom() {
 
 function loseGame() {
   clearInterval(moveInterval);
-//  ctx.clearRect(0, 0, size, size);
-//  ctx.font = "30px Arial";
-//  ctx.fillText("You lose", 250, 300);
+  ctx.clearRect(0, 0, size, size);
+  ctx.font = "30px Arial";
+  ctx.fillText("You lose", 250, 300);
   return;
 }
