@@ -70,7 +70,6 @@ let snake = {
   ],
 }
 
-//console.log(snake.body);
 let el = {
   body: [ 
     {x: 5, y: 5} 
@@ -115,6 +114,11 @@ snakeHead.addEventListener('load', function() {
   
   //move snake forward by default
   moveInterval = setInterval(function() {
+    if(queue.length !== 0) {
+      changeDir(queue[0]);
+      queue.shift();
+    }
+
     if (snake.direction === "u" || snake.direction === "l") {
       coefficient = -1;
       move(snake.body, coefficient);
@@ -130,6 +134,7 @@ snakeHead.src = 'img/snake-head.jpg';
 
 
 let snakebodyPx, coefficient, circle, dotsBody;
+let queue = [];
 
 function changeDir(direction) {
   if(direction === 'l' && snake.direction !== "r") {
@@ -153,16 +158,24 @@ function changeDir(direction) {
 addEventListener("keydown", function (e) {
   switch(e.keyCode) {
     case 37:
-      changeDir('l');
+      if(queue[0] !== 'l') {
+        queue.push('l');
+      }
       break;
     case 38:
-      changeDir('u');
+      if(queue[0] !== 'u') {
+        queue.push('u');
+      }
       break;
     case 39:
-      changeDir('r');
+      if(queue[0] !== 'r') {
+        queue.push('r');
+      }
       break;
     case 40:
-      changeDir('d');
+      if(queue[0] !== 'd') {
+        queue.push('d');
+      }
       break;
     default:
       break;
