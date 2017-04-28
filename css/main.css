@@ -8,10 +8,17 @@ body {
   position: relative;
 }
 
-#snake-game {
+#field {
+  position: relative;
+  width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 100px;
+}
+
+#counter {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  -webkit-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);   
+  right: 0;
+  top: 50px;
+  font-size: 30px;
 }
