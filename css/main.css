@@ -22,3 +22,17 @@ body {
   top: 50px;
   font-size: 30px;
 }
+
+.pause {
+  position: absolute;
+  right: 260px;
+  top: 50px;
+  font-size: 30px;
+  animation: blink 2s infinite ease-in-out;
+}
+
+@keyframes blink {
+  0% {color: black;}
+  50% {color:yellowgreen;}
+  100% {color:black;}
+}
