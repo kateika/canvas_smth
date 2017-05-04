@@ -8,6 +8,7 @@ const count = document.getElementById('counter');
 
 const step = 60;
 let size = canvas.getAttribute("width");
+let counter = 0;
 
 if (canvas.getContext && canvasU.getContext && canvasD.getContext && canvasL.getContext && canvasR.getContext) {
   var ctx = canvas.getContext('2d');
@@ -52,15 +53,15 @@ let snake = {
 
 let el = {
   body: [ 
-    {x: 5, y: 5} 
+    {x: getRandom(), y: getRandom()} 
   ],
   color: "#d26902"
 }
 
-let counter = 0;
+let elPx = fromCellsToPx(el.body);;
 
 ctx.fillStyle = el.color;
-ctx.fillRect( 300 + adjustDraw, 300 + adjustDraw, 54, 54 );
+ctx.fillRect( elPx[0].x + adjustDraw, elPx[0].y + adjustDraw, 54, 54 );
 
 function fromCellsToPx(body) {
   var bodyPixels = [];
@@ -151,24 +152,6 @@ addEventListener("keydown", function (e) {
 });
 
 
-let paused = 0;
-let pauseText = document.createElement('span');
-pauseText.classList.add("pause");
-pauseText.innerHTML = "Pause";
-
-function pause() {
-  if(paused === 0) {
-    field.insertBefore(pauseText, count);
-    clearInterval(moveInterval);
-    paused = 1;
-  } else {
-    field.removeChild(pauseText);
-    goSnake();
-    paused = 0;
-  }
-}
-
-
 function move(coefficient) {
   if (snake.direction === "u" || snake.direction === "d") {
     var coefficientY = coefficient;
@@ -231,7 +214,7 @@ function drawFood() {
     }
   }
   
-  let elPx = fromCellsToPx(el.body);
+  elPx = fromCellsToPx(el.body);
   ctx.fillStyle = el.color;
   ctx.fillRect( elPx[0].x + adjustDraw, elPx[0].y + adjustDraw, 54, 54 );
 }
@@ -245,20 +228,38 @@ let moveInterval;
 
 function goSnake() {
   moveInterval = setInterval(function() {
-  if(queue.length !== 0) {
-    changeDir(queue[0]);
-    queue.shift();
-  }
+    if(queue.length !== 0) {
+      changeDir(queue[0]);
+      queue.shift();
+    }
 
-  if (snake.direction === "u" || snake.direction === "l") {
-    coefficient = -1;
-    move(coefficient);
-  } 
-  if (snake.direction === "d" || snake.direction === "r") {
-    coefficient = 1;
-    move(coefficient);
-  };
-}, 300);
+    if (snake.direction === "u" || snake.direction === "l") {
+      coefficient = -1;
+      move(coefficient);
+    } 
+    if (snake.direction === "d" || snake.direction === "r") {
+      coefficient = 1;
+      move(coefficient);
+    };
+  }, 300);
+}
+
+
+let paused = 0;
+let pauseText = document.createElement('span');
+pauseText.classList.add("pause");
+pauseText.innerHTML = "Pause";
+
+function pause() {
+  if(paused === 0) {
+    field.insertBefore(pauseText, count);
+    clearInterval(moveInterval);
+    paused = 1;
+  } else {
+    field.removeChild(pauseText);
+    goSnake();
+    paused = 0;
+  }
 }
 
 function loseGame() {
