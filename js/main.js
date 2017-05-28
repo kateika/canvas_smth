@@ -1,8 +1,60 @@
+function SnakeHeadSpite(callback) {
+  this.canvasU = document.createElement('canvas');
+  this.canvasD = document.createElement('canvas');
+  this.canvasL = document.createElement('canvas');
+  this.canvasR = document.createElement('canvas');
+
+  if(this.canvasR.getContext && this.canvasU.getContext && this.canvasD.getContext && this.canvasL.getContext) {
+    var ctxU = this.canvasU.getContext('2d');
+    var ctxD = this.canvasD.getContext('2d');
+    var ctxL = this.canvasL.getContext('2d');
+    var ctxR = this.canvasR.getContext('2d');
+  }
+
+  var snakeHead = new Image();
+  
+  snakeHead.addEventListener('load', function() {
+    ctxU.drawImage(snakeHead, 0, 0);
+    
+    //other heads
+    ctxR.rotate(90*Math.PI/180);
+    ctxR.translate(0, -54);
+    ctxR.drawImage(snakeHead, 0, 0);
+    
+    ctxL.rotate(90*Math.PI*(-1)/180);
+    ctxL.translate(-54, 0);
+    ctxL.drawImage(snakeHead, 0, 0);
+    
+    ctxD.rotate(180*Math.PI/180);
+    ctxD.translate(-54, -54);
+    ctxD.drawImage(snakeHead, 0, 0);
+    
+    //start game
+    callback();
+  })
+
+  snakeHead.src = 'img/snake-head.jpg';  
+}
+
+SnakeHeadSpite.prototype.getSpriteLeft = function() {
+  return this.canvasL;
+}
+
+SnakeHeadSpite.prototype.getSpriteRight = function() {
+  return this.canvasR;
+}
+
+SnakeHeadSpite.prototype.getSpriteUp = function() {
+  return this.canvasU;
+}
+
+SnakeHeadSpite.prototype.getSpriteDown = function() {
+  return this.canvasD;
+}
+
+const snakeHeadSprite = new SnakeHeadSpite(goSnake);
+
 const canvas = document.getElementById('snake-game');
-const canvasU = document.createElement('canvas');
-const canvasD = document.createElement('canvas');
-const canvasL = document.createElement('canvas');
-const canvasR = document.createElement('canvas');
 const field = document.getElementById('field');
 const count = document.getElementById('counter');
 
@@ -10,13 +62,9 @@ const step = 60;
 let size = canvas.getAttribute("width");
 let counter = 0;
 
-if (canvas.getContext && canvasU.getContext && canvasD.getContext && canvasL.getContext && canvasR.getContext) {
+if (canvas.getContext) {
   var ctx = canvas.getContext('2d');
-  var ctxU = canvasU.getContext('2d');
-  var ctxD = canvasD.getContext('2d');
-  var ctxL = canvasL.getContext('2d');
-  var ctxR = canvasR.getContext('2d');
-}
+ }
 
 
 //adjustments for drawing image in the center of cell and for avoiding clean the border of cells
@@ -42,7 +90,7 @@ for ( var i = 0; i <= size; i+=60 ) {
 ctx.closePath();
 
 let snake = {
-  currHead: canvasU,
+  currHead: snakeHeadSprite.getSpriteUp(),
   direction: "u",
   body: [ 
     {x: 5, y: 8},
@@ -74,52 +122,25 @@ function fromCellsToPx(body) {
   return bodyPixels;
 }
 
-
-//draw snakeHead on another canvas and set started point
-let snakeHead = new Image();
-
-snakeHead.addEventListener('load', function() {
-  ctxU.drawImage(snakeHead, 0, 0);
-  
-  //other heads
-  ctxR.rotate(90*Math.PI/180);
-  ctxR.translate(0, -54);
-  ctxR.drawImage(snakeHead, 0, 0);
-  
-  ctxL.rotate(90*Math.PI*(-1)/180);
-  ctxL.translate(-54, 0);
-  ctxL.drawImage(snakeHead, 0, 0);
-  
-  ctxD.rotate(180*Math.PI/180);
-  ctxD.translate(-54, -54);
-  ctxD.drawImage(snakeHead, 0, 0);
-  
-  //move snake forward by default
-  goSnake();
-})
-
-snakeHead.src = 'img/snake-head.jpg';
-
-
 let snakebodyPx, coefficient, circle, dotsBody;
 let queue = [];
 
 function changeDir(direction) {
   if(direction === 'l' && snake.direction !== "r") {
     snake.direction = "l";
-    snake.currHead = canvasL;
+    snake.currHead = snakeHeadSprite.getSpriteLeft();
   }
   if(direction === 'u' && snake.direction !== "d") {
     snake.direction = "u";
-    snake.currHead = canvasU;
+    snake.currHead = snakeHeadSprite.getSpriteUp();
   }
   if(direction === 'r' && snake.direction !== "l") {
     snake.direction = "r";
-    snake.currHead = canvasR;
+    snake.currHead = snakeHeadSprite.getSpriteRight();
   }
   if(direction === 'd' && snake.direction !== "u") {
     snake.direction = "d";
-    snake.currHead = canvasD;
+    snake.currHead = snakeHeadSprite.getSpriteDown();
   }
 }
 
