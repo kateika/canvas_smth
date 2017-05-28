@@ -192,6 +192,47 @@ Snake.prototype.hasEaten = function(food) {
   return food.y === head.y && food.x === head.x;
 }
 
+function UserInputQueue() {
+  this.queue = [];
+  addEventListener("keydown", this.keyDownHandler.bind(this));
+}
+
+UserInputQueue.prototype.shift = function() {
+  return this.queue.shift();
+}
+
+Object.defineProperty(UserInputQueue.prototype, "length", {
+  get: function() {
+    return this.queue.length;
+  }
+});
+
+UserInputQueue.prototype.keyDownHandler = function(e) {
+  let latest = this.queue[0];
+  switch(e.keyCode) {
+    case 37:
+      if(latest !== 'l') {
+        this.queue.push('l');
+      }
+      break;
+    case 38:
+      if(latest !== 'u') {
+        this.queue.push('u');
+      }
+      break;
+    case 39:
+      if(latest !== 'r') {
+        this.queue.push('r');
+      }
+      break;
+    case 40:
+      if(latest !== 'd') {
+        this.queue.push('d');
+      }
+      break;
+  }
+}
+
 const snakeHeadSprite = new SnakeHeadSprite(play);
 const food = new Food('#d26902');
 const snake = new Snake("u", [
@@ -213,36 +254,13 @@ pauseText.innerHTML = "Pause";
 
 const count = document.getElementById('counter');
 let counter = 0;
-let queue = [];
+
+const queue = new UserInputQueue();
 
 addEventListener("keydown", keyDownHandler);
 
 function keyDownHandler(e) {
-  switch(e.keyCode) {
-    case 37:
-      if(queue[0] !== 'l') {
-        queue.push('l');
-      }
-      break;
-    case 38:
-      if(queue[0] !== 'u') {
-        queue.push('u');
-      }
-      break;
-    case 39:
-      if(queue[0] !== 'r') {
-        queue.push('r');
-      }
-      break;
-    case 40:
-      if(queue[0] !== 'd') {
-        queue.push('d');
-      }
-      break;
-    default:
-      pause();
-      break;
-  }
+  if(e.keyCode == 32) pause();
 };
 
 function gameTick() {
