@@ -192,7 +192,7 @@ Snake.prototype.hasEaten = function(food) {
   return food.y === head.y && food.x === head.x;
 }
 
-const snakeHeadSprite = new SnakeHeadSprite(goSnake);
+const snakeHeadSprite = new SnakeHeadSprite(play);
 const food = new Food('#d26902');
 const snake = new Snake("u", [
   {x: 6, y: 9},
@@ -201,13 +201,21 @@ const snake = new Snake("u", [
 ]);
 
 const gameField = new GameField();
-
 gameField.drawField();
 drawFood();
+
+let moveInterval;
+
+let paused = 0;
+const pauseText = document.createElement('span');
+pauseText.classList.add("pause");
+pauseText.innerHTML = "Pause";
 
 const count = document.getElementById('counter');
 let counter = 0;
 let queue = [];
+
+addEventListener("keydown", keyDownHandler);
 
 function keyDownHandler(e) {
   switch(e.keyCode) {
@@ -237,12 +245,9 @@ function keyDownHandler(e) {
   }
 };
 
-addEventListener("keydown", keyDownHandler);
-
 function gameTick() {
   if(queue.length !== 0) {
-    snake.setDirection(queue[0]);
-    queue.shift();
+    snake.setDirection(queue.shift());
   }
 
   snake.move(food);
@@ -251,14 +256,14 @@ function gameTick() {
   
   // check if not outside the field
   if (head.x < 1 || head.y < 1 || head.x > 10 || head.y > 10) {
-    loseGame();
+    gameOver();
     return;
   }
 
   // check if not running into itself
   for (let part of body) {
     if (head.x === part.x && head.y === part.y) {
-      loseGame();
+      gameOver();
       return;
     }
   }
@@ -293,17 +298,9 @@ function getRandom() {
   return Math.ceil(Math.random() * 10);
 }
 
-let moveInterval;
-
-function goSnake() {
+function play() {
   moveInterval = setInterval(gameTick, 300);
 }
-
-
-let paused = 0;
-let pauseText = document.createElement('span');
-pauseText.classList.add("pause");
-pauseText.innerHTML = "Pause";
 
 function pause() {
   if(paused === 0) {
@@ -312,15 +309,14 @@ function pause() {
     paused = 1;
   } else {
     field.removeChild(pauseText);
-    goSnake();
+    play();
     paused = 0;
   }
 }
 
-function loseGame() {
+function gameOver() {
   field.removeChild(count);
   clearInterval(moveInterval);
   removeEventListener("keydown", keyDownHandler);
   gameField.drawLoseGameScreen(counter);
-  return;
 }
