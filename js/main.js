@@ -141,15 +141,22 @@ Snake.prototype.getBody = function() {
   return this.body.slice(1);
 }
 
-Snake.prototype.move = function(coefficient, food) {
-  let coefficientX, coefficientY;
+Snake.prototype.move = function(food) {
+  let coefficientX = coefficientY = 0;
 
-  if (this.direction === "u" || this.direction === "d") {
-    coefficientY = coefficient;
-    coefficientX = 0;
-  } else {
-    coefficientY = 0;
-    coefficientX = coefficient;
+  switch (this.direction) {
+    case "l":
+      coefficientX = -1;
+      break;
+    case "u":
+      coefficientY = -1;
+      break;
+    case "r":
+      coefficientX = 1;
+      break;
+    case "d":
+      coefficientY = 1;
+      break;      
   }
   
   let oldHead = this.getHead();
@@ -187,20 +194,19 @@ Snake.prototype.hasEaten = function(food) {
 
 const snakeHeadSprite = new SnakeHeadSprite(goSnake);
 const food = new Food('#d26902');
-let snake = new Snake("u", [
+const snake = new Snake("u", [
   {x: 6, y: 9},
   {x: 6, y: 10}, 
   {x: 6, y: 11},   
 ]);
 
-
 const gameField = new GameField();
+
 gameField.drawField();
 drawFood();
 
 const count = document.getElementById('counter');
 let counter = 0;
-let coefficient;
 let queue = [];
 
 function keyDownHandler(e) {
@@ -233,8 +239,13 @@ function keyDownHandler(e) {
 
 addEventListener("keydown", keyDownHandler);
 
-function move(coefficient) {
-  snake.move(coefficient, food);
+function gameTick() {
+  if(queue.length !== 0) {
+    snake.setDirection(queue[0]);
+    queue.shift();
+  }
+
+  snake.move(food);
   let head = snake.getHead();
   let body = snake.getBody();  
   
@@ -285,21 +296,7 @@ function getRandom() {
 let moveInterval;
 
 function goSnake() {
-  moveInterval = setInterval(function() {
-    if(queue.length !== 0) {
-      snake.setDirection(queue[0]);
-      queue.shift();
-    }
-
-    if (snake.direction === "u" || snake.direction === "l") {
-      coefficient = -1;
-      move(coefficient);
-    } 
-    if (snake.direction === "d" || snake.direction === "r") {
-      coefficient = 1;
-      move(coefficient);
-    };
-  }, 300);
+  moveInterval = setInterval(gameTick, 300);
 }
 
 
