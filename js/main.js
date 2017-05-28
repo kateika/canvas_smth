@@ -1,4 +1,4 @@
-function SnakeHeadSpite(callback) {
+function SnakeHeadSprite(callback) {
   this.canvasU = document.createElement('canvas');
   this.canvasD = document.createElement('canvas');
   this.canvasL = document.createElement('canvas');
@@ -36,93 +36,118 @@ function SnakeHeadSpite(callback) {
   snakeHead.src = 'img/snake-head.jpg';  
 }
 
-SnakeHeadSpite.prototype.getSpriteLeft = function() {
+SnakeHeadSprite.prototype.getSpriteLeft = function() {
   return this.canvasL;
 }
 
-SnakeHeadSpite.prototype.getSpriteRight = function() {
+SnakeHeadSprite.prototype.getSpriteRight = function() {
   return this.canvasR;
 }
 
-SnakeHeadSpite.prototype.getSpriteUp = function() {
+SnakeHeadSprite.prototype.getSpriteUp = function() {
   return this.canvasU;
 }
 
-SnakeHeadSpite.prototype.getSpriteDown = function() {
+SnakeHeadSprite.prototype.getSpriteDown = function() {
   return this.canvasD;
 }
 
-const snakeHeadSprite = new SnakeHeadSpite(goSnake);
+function GameField() {
+  this.canvas = document.getElementById('snake-game');
+  if (this.canvas.getContext) {
+    this.ctx = this.canvas.getContext('2d');
+  }
+  const field = document.getElementById('field');
+  this.size = this.canvas.getAttribute('width');
+  this.lastCell = null;
 
-const canvas = document.getElementById('snake-game');
-const field = document.getElementById('field');
-const count = document.getElementById('counter');
-
-const step = 60;
-let size = canvas.getAttribute("width");
-let counter = 0;
-
-if (canvas.getContext) {
-  var ctx = canvas.getContext('2d');
- }
-
-
-//adjustments for drawing image in the center of cell and for avoiding clean the border of cells
-const adjustMove = 2,
-      adjustDraw = 3,
-      adjustCleanArea = 4;
-
-ctx.beginPath();
-
-//draw a field
-for ( var i = 0; i <= size; i+=60 ) {
-  ctx.moveTo(i, 0);
-  ctx.lineTo(i, size);
-  ctx.stroke();
+  //adjustments for drawing image in the center of cell and for avoiding clean the border of cells
+  this.ADJUST_MOVE = 2;
+  this.ADJUST_DRAW = 3;
+  this.ADJUST_CLEAN_AREA = 4;
+  this.FOOD_SIZE = 54;
+  this.STEP = 60;  
 }
 
-for ( var i = 0; i <= size; i+=60 ) {
-  ctx.moveTo(0, i);
-  ctx.lineTo(size, i);
-  ctx.stroke();
+GameField.prototype.drawField = function() {
+  this.ctx.beginPath();
+
+  //draw a field
+  for ( var i = 0; i <= this.size; i += this.STEP ) {
+    this.ctx.moveTo(i, 0);
+    this.ctx.lineTo(i, this.size);
+    this.ctx.stroke();
+  }
+
+  for ( var i = 0; i <= this.size; i += this.STEP ) {
+    this.ctx.moveTo(0, i);
+    this.ctx.lineTo(this.size, i);
+    this.ctx.stroke();
+  }
+
+  this.ctx.closePath();
 }
 
-ctx.closePath();
+GameField.prototype.drawFood = function(coord, color) {
+  this.ctx.fillStyle = color;
+  var x = this.coordToPx(coord.x);
+  var y = this.coordToPx(coord.y);
+  this.ctx.fillRect(x, y, this.FOOD_SIZE, this.FOOD_SIZE)
+}
+
+GameField.prototype.drawSnake = function(snake) {
+  if(this.lastCell) {
+    this.ctx.clearRect(this.coordToPx(this.lastCell.x), this.coordToPx(this.lastCell.y), this.STEP - this.ADJUST_CLEAN_AREA, this.STEP - this.ADJUST_CLEAN_AREA);
+  }
+
+  var head = snake.body[0];
+  var body = snake.body.slice(1);  
+  this.ctx.drawImage(snake.currHead, this.coordToPx(head.x), this.coordToPx(head.y));
+  this.ctx.fillStyle = "yellowgreen";
+  for(let i = 0; i < body.length; i++) {
+    this.ctx.fillRect(this.coordToPx(body[i].x), this.coordToPx(body[i].y), this.FOOD_SIZE, this.FOOD_SIZE);
+  }
+
+  this.lastCell = body[body.length - 1];
+}
+
+GameField.prototype.drawLoseGameScreen = function(score) {
+  this.ctx.clearRect(0, 0, this.size, this.size);
+  this.ctx.font = "30px Arial";
+  this.ctx.fillText("You lose", 250, 300);
+  this.ctx.fillText("Your score: " + score, 225, 350);
+}
+
+GameField.prototype.coordToPx = function(coord) {
+  return coord * this.STEP - this.STEP + this.ADJUST_DRAW;;
+}
+
+const snakeHeadSprite = new SnakeHeadSprite(goSnake);
+
+let el = {
+  body: [ 
+    {x: 0, y: 0} 
+  ],
+  color: "#d26902"
+}
 
 let snake = {
   currHead: snakeHeadSprite.getSpriteUp(),
   direction: "u",
   body: [ 
-    {x: 5, y: 8},
-    {x: 5, y: 9}, 
-    {x: 5, y: 10},
+    {x: 6, y: 8},
+    {x: 6, y: 9}, 
+    {x: 6, y: 10},
   ],
-}
+};
 
-let el = {
-  body: [ 
-    {x: getRandom(), y: getRandom()} 
-  ],
-  color: "#d26902"
-}
+const gameField = new GameField();
+gameField.drawField();
+drawFood();
 
-let elPx = fromCellsToPx(el.body);;
-
-ctx.fillStyle = el.color;
-ctx.fillRect( elPx[0].x + adjustDraw, elPx[0].y + adjustDraw, 54, 54 );
-
-function fromCellsToPx(body) {
-  var bodyPixels = [];
-  for (var i = 0; i < body.length; i++) {
-    bodyPixels[i] = {
-      x: body[i].x * step,
-      y: body[i].y * step
-    }
-  }
-  return bodyPixels;
-}
-
-let snakebodyPx, coefficient, circle, dotsBody;
+const count = document.getElementById('counter');
+let counter = 0;
+let coefficient;
 let queue = [];
 
 function changeDir(direction) {
@@ -144,7 +169,7 @@ function changeDir(direction) {
   }
 }
 
-addEventListener("keydown", function (e) {
+function keyDownHandler(e) {
   switch(e.keyCode) {
     case 37:
       if(queue[0] !== 'l') {
@@ -170,8 +195,9 @@ addEventListener("keydown", function (e) {
       pause();
       break;
   }
-});
+};
 
+addEventListener("keydown", keyDownHandler);
 
 function move(coefficient) {
   if (snake.direction === "u" || snake.direction === "d") {
@@ -182,16 +208,11 @@ function move(coefficient) {
     var coefficientX = coefficient;
   }
 
-  snakebodyPx = fromCellsToPx(snake.body);
+  let oldHead = snake.body[0];
+  let head = { x: oldHead.x + coefficientX, y: oldHead.y + coefficientY };
+  snake.body.unshift(head);
   
-    
-  var lastElToPx = fromCellsToPx(snake.body)[snake.body.length-1];
-  
-  ctx.clearRect(lastElToPx.x + adjustMove, lastElToPx.y + adjustMove, step - adjustCleanArea, step - adjustCleanArea);
-  
-  snake.body.unshift({x: snake.body[0].x + coefficientX, y: snake.body[0].y + coefficientY});
-  
-  if (el.body[0].y === snake.body[0].y && el.body[0].x === snake.body[0].x) {
+  if (el.body[0].y === head.y && el.body[0].x === head.x) {
     counter++;
     count.innerHTML = counter;
     drawFood();
@@ -199,28 +220,24 @@ function move(coefficient) {
     snake.body.pop();
   }
   
-  snakebodyPx = fromCellsToPx(snake.body);
-
-  if (snake.body[0].x < 0 || snake.body[0].y < 0 || snake.body[0].x > 9 || snake.body[0].y > 9) {
+  // check if not outside the field
+  if (head.x < 1 || head.y < 1 || head.x > 10 || head.y > 10) {
     loseGame();
     return;
-  } 
-  
-  ctx.drawImage(snake.currHead, snakebodyPx[0].x + adjustDraw, snakebodyPx[0].y + adjustDraw);
-  
-  dotsBody = snakebodyPx.slice(1);
-  
-  for (var coordinates of dotsBody) {
-    if (snakebodyPx[0].x === coordinates.x && snakebodyPx[0].y === coordinates.y) {
+  }
+
+  // check if not running into itself
+  let body = snake.body.slice(1);  
+  for (let part of body) {
+    if (head.x === part.x && head.y === part.y) {
       loseGame();
       return;
     }
-    ctx.fillStyle = "yellowgreen"; //works only for one color for now
-    ctx.fillRect( coordinates.x + adjustDraw, coordinates.y + adjustDraw, 54, 54 );
   }
+
+  gameField.drawSnake(snake);
 }
 
-//let occupiedCell;
 function drawFood() {
   let occupiedCell = 0;
 
@@ -235,14 +252,12 @@ function drawFood() {
     }
   }
   
-  elPx = fromCellsToPx(el.body);
-  ctx.fillStyle = el.color;
-  ctx.fillRect( elPx[0].x + adjustDraw, elPx[0].y + adjustDraw, 54, 54 );
+  gameField.drawFood(el.body[0], el.color);
 }
 
 
 function getRandom() {
-  return Math.floor(Math.random() * 10);
+  return Math.ceil(Math.random() * 10);
 }
 
 let moveInterval;
@@ -286,10 +301,7 @@ function pause() {
 function loseGame() {
   field.removeChild(count);
   clearInterval(moveInterval);
-  ctx.clearRect(0, 0, size, size);
-  ctx.font = "30px Arial";
-  ctx.fillText("You lose", 250, 300);
-  ctx.fillText("Your score: " + counter, 225, 350);
+  removeEventListener("keydown", keyDownHandler);
+  gameField.drawLoseGameScreen(counter);
   return;
 }
-
