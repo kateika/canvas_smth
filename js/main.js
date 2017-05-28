@@ -88,10 +88,10 @@ GameField.prototype.drawField = function() {
   this.ctx.closePath();
 }
 
-GameField.prototype.drawFood = function(coord, color) {
-  this.ctx.fillStyle = color;
-  var x = this.coordToPx(coord.x);
-  var y = this.coordToPx(coord.y);
+GameField.prototype.drawFood = function(food) {
+  this.ctx.fillStyle = food.color;
+  var x = this.coordToPx(food.x);
+  var y = this.coordToPx(food.y);
   this.ctx.fillRect(x, y, this.FOOD_SIZE, this.FOOD_SIZE)
 }
 
@@ -122,14 +122,15 @@ GameField.prototype.coordToPx = function(coord) {
   return coord * this.STEP - this.STEP + this.ADJUST_DRAW;;
 }
 
-const snakeHeadSprite = new SnakeHeadSprite(goSnake);
-
-let el = {
-  body: [ 
-    {x: 0, y: 0} 
-  ],
-  color: "#d26902"
+function Food(color) {
+  this.color = color;
+  this.x = 0;
+  this.y = 0;
 }
+
+
+const snakeHeadSprite = new SnakeHeadSprite(goSnake);
+const food = new Food('#d26902');
 
 let snake = {
   currHead: snakeHeadSprite.getSpriteUp(),
@@ -212,7 +213,7 @@ function move(coefficient) {
   let head = { x: oldHead.x + coefficientX, y: oldHead.y + coefficientY };
   snake.body.unshift(head);
   
-  if (el.body[0].y === head.y && el.body[0].x === head.x) {
+  if (food.y === head.y && food.x === head.x) {
     counter++;
     count.innerHTML = counter;
     drawFood();
@@ -242,19 +243,18 @@ function drawFood() {
   let occupiedCell = 0;
 
   while(occupiedCell === 0) {
-    el.body[0].x = getRandom();
-    el.body[0].y = getRandom();   
+    food.x = getRandom();
+    food.y = getRandom();   
     occupiedCell = 1;
     for (var coordinates of snake.body) {
-      if (el.body[0].x === coordinates.x && el.body[0].y === coordinates.y) {
+      if (food.x === coordinates.x && food.y === coordinates.y) {
         occupiedCell = 0;
       }
     }
   }
   
-  gameField.drawFood(el.body[0], el.color);
+  gameField.drawFood(food);
 }
-
 
 function getRandom() {
   return Math.ceil(Math.random() * 10);
